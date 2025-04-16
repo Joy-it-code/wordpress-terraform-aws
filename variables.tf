@@ -24,18 +24,8 @@ variable "ec2_key_name" {
   type        = string
 }
 
-variable "bastion_ami" {
-  description = "The AMI ID for the Bastion instance"
-  type        = string
-}
-
-variable "wordpress_ami" {
-  description = "The AMI ID for the WordPress instance"
-  type        = string
-}
-
-variable "bastion_sg_id" {
-  description = "Security Group ID for the Bastion host"
+variable "ami_id" {
+  description = "The AMI ID for the ec2"
   type        = string
 }
 
@@ -46,16 +36,6 @@ variable "vpc_id" {
 
 variable "public_subnet_ids" {
   description = "List of public subnet IDs"
-  type        = list(string)
-}
-
-variable "ami_id" {
-  description = "AMI ID for EC2 instances"
-  type        = string
-}
-
-variable "private_subnet_ids" {
-  description = "List of private subnet IDs"
   type        = list(string)
 }
 

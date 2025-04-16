@@ -1,12 +1,15 @@
-# Automated WordPress Deployment on AWS with Terraform
+# 📘 Automated WordPress Deployment on AWS with Terraform
 
 ## Project Overview
+![](./img/1b.overview.png)
+
+
+---
 
 ##  Objective:
 This project deploys a highly available, secure, and scalable WordPress application on AWS using Terraform Infrastructure as Code (IaC).
 
-![](./img/1b.overview.png)
-
+---
 
 ## Key Features
 It uses a modular approach to provision:
@@ -23,8 +26,9 @@ It uses a modular approach to provision:
 
 + Complete automation via Terraform & shell scripting
 
+---
 
-## Prerequisites
+## 🔧 Prerequisites
 
 Make sure you have:
 
@@ -38,8 +42,9 @@ Make sure you have:
 
 + A basic WordPress Docker image or EC2 AMI ready
 
+---
 
-## Project Structure
+## 🌐 Project Structure
 ```
 wordpress-terraform-aws/
 ├── .gitignore
@@ -73,8 +78,16 @@ wordpress-terraform-aws/
 │   │   ├── variables.tf
 │   │   ├── outputs.tf
 │   │   └── user_data.sh
+│   ├── bastion/
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   └── outputs.tf
+│   └── wordpress/
+│       ├── main.tf
+│       ├── variables.tf
+│       └── outputs.tf
 ```
-
+---
 
 ## Create .gitignore to Exclude Sensitive Files
 ```
@@ -118,32 +131,27 @@ Thumbs.db
 *.swp
 *.swo
 ```
+---
 
-## Getting Started
-+ Create a Repository on Github:
+## 🚀 Getting Started
++ Create a Repository on Github and clone into it:
 ```
-mkdir -p modules/vpc
-cd wordpress-terraform-aws/
 git clone https://github.com/yourusername/wordpress-terraform-aws.git
+cd wordpress-terraform-aws/
 ```
 ![](./img/1.git.clone.png)
 
+---
 
-
-## 1️⃣ Create the VPC module files
-Inside the modules/vpc folder, run:
-```
-cd modules/vpc
-touch main.tf variables.tf outputs.tf
-```
 
 ## Create root-level files
 ```
-cd ../../
 touch main.tf variables.tf terraform.tfvars outputs.tf
 ```
 
 ## Create root main.tf
+**Note:** I added each module at to the main.tf(root) as I progressed.
+
 **File: main.tf (root)**
 ```
 provider "aws" {
@@ -238,18 +246,8 @@ variable "ec2_key_name" {
   type        = string
 }
 
-variable "bastion_ami" {
-  description = "The AMI ID for the Bastion instance"
-  type        = string
-}
-
-variable "wordpress_ami" {
-  description = "The AMI ID for the WordPress instance"
-  type        = string
-}
-
-variable "bastion_sg_id" {
-  description = "Security Group ID for the Bastion host"
+variable "ami_id" {
+  description = "The AMI ID for the ec2"
   type        = string
 }
 
@@ -260,16 +258,6 @@ variable "vpc_id" {
 
 variable "public_subnet_ids" {
   description = "List of public subnet IDs"
-  type        = list(string)
-}
-
-variable "ami_id" {
-  description = "AMI ID for EC2 instances"
-  type        = string
-}
-
-variable "private_subnet_ids" {
-  description = "List of private subnet IDs"
   type        = list(string)
 }
 
@@ -284,19 +272,6 @@ variable "bastion_instance_type" {
   type        = string
   default     = "t2.micro"
 }
-```
-
-## Create terraform.tfvars
-**File: terraform.tfvars**
-```
-vpc_cidr    = "10.20.0.0/16"
-db_name = "wordpress_db"
-db_user = "admin"
-db_pass = "supersecurepassword123"
-vpc_id             = "vpc-02d93e93407d3a249"
-public_subnet_ids  = ["subnet-05b9c815aa964cb53", "subnet-00f8bb5b4532d0025"]
-ami_id             = "ami-00a929b66ed6e0de6"
-ec2_key_name       = "wordpress-key"   
 ```
 
 **File: outputs.tf (Root)**
@@ -329,6 +304,27 @@ output "alb_target_group_arn" {
 }
 ```
 
+## Create terraform.tfvars
+**File: terraform.tfvars**
+```
+vpc_cidr          = "10.20.0.0/16"
+db_name           = "wordpress_db"
+db_user           = "admin"
+db_pass           = "supersecurepassword123"
+vpc_id            = "vpc-02d93e93407d3a249"
+public_subnet_ids = ["subnet-05b9c815aa964cb53", "subnet-00f8bb5b4532d0025"]
+ami_id            = "ami-00a929b66ed6e0de6"
+ec2_key_name      = "wordpress-key"   
+```
+---
+
+
+## 🌐1️⃣: Create the VPC module files
+Inside the modules/vpc folder, run:
+```
+mkdir -p modules/vpc
+touch main.tf variables.tf outputs.tf
+```
 
 ## 🔹 VPC, Subnets & NAT Gateway
 **Files:**
@@ -339,7 +335,7 @@ output "alb_target_group_arn" {
 
 + **outputs.tf:** Subnet IDs, VPC ID
 
-### Security Measures:
+### 🔐 Security Measures:
 
 + Public subnet: only ALB allowed
 
@@ -383,10 +379,9 @@ resource "aws_nat_gateway" "nat" {
 }
 
 resource "aws_eip" "nat" {
-  domain = "vpc"  
+  domain = "vpc"
   # other arguments...
 }
-
 
 resource "aws_route_table" "public_rt" {
   vpc_id = aws_vpc.main.id
@@ -428,24 +423,6 @@ variable "vpc_cidr" {
 }
 ```
 
-**main.modules/vpc/**
-**terraform.tf**
-```
-ami_id         = "ami-00a929b66ed6e0de6"
-key_pair_name  = "my-keypair"
-
-db_name        = "wordpress_db"
-db_user        = "admin"
-db_pass        = "supersecurepassword123"
-
-vpc_cidr       = "10.20.0.0/16"
-instance_type  = "t3.micro"
-
-min_size        = 1
-max_size        = 3
-desired_capacity = 1
-```
-
  **main.modules/vpc/**
  **output.tf**
  ```
@@ -470,6 +447,7 @@ terraform validate
 terraform plan
 terraform apply
 ```
+---
 
 
 ## Shell Commands to Create This Structure
@@ -491,18 +469,18 @@ touch modules/alb/main.tf modules/alb/variables.tf modules/alb/outputs.tf
 touch modules/asg/main.tf modules/asg/variables.tf modules/asg/outputs.tf modules/asg/user_data.sh
 ```
 
-## 2️⃣: RDS (MySQL Database)
+## 🗃️ 2️⃣: RDS (MySQL Database)
 **Module: modules/rds/**
 
 **Files:**
 
-**main.tf:** RDS instance, parameter group
++ **main.tf:** RDS instance, parameter group
 
-**variables.tf:** DB name, username, password
++ **variables.tf:** DB name, username, password
 
-**outputs.tf:** RDS endpoint
++ **outputs.tf:** RDS endpoint
 
-## Security Measures:
+## 🔐 Security Measures:
 
 + DB not publicly accessible
 
@@ -597,19 +575,6 @@ output "rds_endpoint" {
 }
 ```
 
-**main.tf (root)**
-Add
-```
-module "rds" {
-  source              = "./modules/rds"
-  vpc_id              = module.vpc.vpc_id
-  private_subnet_ids  = module.vpc.private_subnet_ids
-  ec2_sg_id           = module.wordpress.wordpress_sg_id
-  db_name             = var.db_name
-  db_user             = var.db_user
-  db_pass             = var.db_pass
-}
-```
 ### Terraform Commands:
 ```
 terraform init
@@ -699,6 +664,7 @@ output "bastion_sg_id" {
 ```
 
 
+
 ### WordPress EC2 Configuration
 
 **Create modules/WordPress/**
@@ -781,6 +747,7 @@ output "wordpress_sg_id" {
 **Commands:**
 ```
 terraform init
+terraform validate
 terraform plan
 terraform apply
 terraform state list
@@ -788,18 +755,18 @@ terraform state list
 ![](./img/2a.state.png)
 
 
-## 🔹 4️⃣: EFS (Shared WordPress Files)
+## 📁 4️⃣: EFS (Shared WordPress Files)
 Module: modules/efs/
 
 **Files:**
 
-**main.tf:** EFS filesystem and mount targets
++ **main.tf:** EFS filesystem and mount targets
 
-**variables.tf:** subnet IDs
++ **variables.tf:** subnet IDs
 
-**outputs.tf:** EFS ID, DNS name
++ **outputs.tf:** EFS ID, DNS name
 
-### Security Measures:
+### 🔐 Security Measures:
 
 + EFS is private and encrypted.
 
@@ -850,16 +817,18 @@ resource "aws_efs_mount_target" "efs_mount" {
 **variables.tf**
 ```
 variable "private_subnet_ids" {
-  type = list(string)
+  description = "The list of private subnet IDs."
+  type        = list(string)
 }
 
 variable "vpc_id" {
-  type = string
+  description = "The VPC ID where resources will be created."
+  type        = string
 }
 
 variable "ec2_sg_id" {
+  description = "The EC2 security group ID."
   type        = string
-  description = "EC2 SG ID to allow NFS traffic from"
 }
 ```
 
@@ -878,11 +847,12 @@ output "efs_dns_name" {
 **Commands:**
 ```
 terraform init
+terraform validate
 terraform plan
 terraform apply
 ```
 
-## 5️⃣: Application Load Balancer (ALB)
+## ⚖️ 5️⃣: Application Load Balancer (ALB)
 
 **Module: modules/alb/**
 
@@ -894,7 +864,7 @@ terraform apply
 
 + **outputs.tf:** ALB DNS name
 
-**Security Measures:**
+### 🔐 Security Measures:
 
 + Accepts HTTP (port 80) only
 
@@ -983,26 +953,37 @@ variable "public_subnet_ids" {
 
 **output.tf**
 ```
-variable "vpc_id" {
-  type = string
+output "alb_dns_name" {
+  value = aws_lb.wordpress_alb.dns_name
 }
 
-variable "public_subnet_ids" {
-  type = list(string)
+output "alb_arn" {
+  description = "The ARN of the ALB"
+  value       = aws_lb.wordpress_alb.arn
+}
+
+output "alb_sg_id" {
+  value = aws_security_group.alb_sg.id
+}
+
+output "alb_target_group_arn" {
+  value = aws_lb_target_group.wordpress_tg.arn
 }
 ```
 
 **Commands:**
 ```
 terraform init
+terraform validate
 terraform plan
 terraform apply
 terraform state list
 ```
 ![](./img/3a.state.alb.png)
 
+---
 
-## 5️⃣: Auto Scaling Group (ASG) and EC2 Instances
+## 📈 5️⃣: Auto Scaling Group (ASG) and EC2 Instances
 
 **Modules:**
 
@@ -1018,7 +999,7 @@ terraform state list
 
 + Sets up Auto Scaling policy (CPU-based)
 
-**Security Measures:**
+### 🔐 Security Measures:
 
 + EC2 instances use private subnets and only communicate through ALB.
 
@@ -1029,25 +1010,49 @@ terraform state list
 
 ##  modules/asg/ — Auto Scaling Group for WordPress
 
-## user_data.sh 
+## 🌍 user_data.sh 
 ```
 #!/bin/bash
-set -e
-apt update -y
-apt install apache2 php php-mysql -y
-apt install -y nfs-common
-mkdir -p /var/www/html
-mount -t nfs4 ${efs_dns_name}:/ /var/www/html
 
-cd /var/www/html
-wget https://wordpress.org/latest.tar.gz
-tar -xvzf latest.tar.gz
-cp -r wordpress/* .
-rm -rf wordpress latest.tar.gz
+#mount wordpress acces point
+mkdir /var/www/
+sudo mount -t efs -o tls,accesspoint=fsap-075d969a83a54d104 fs-0c3e3beaeaec45aae:/ /var/www/
 
-chown -R www-data:www-data /var/www/html
+#Install httpd
+yum install -y httpd 
+systemctl start httpd
+systemctl enable httpd
 
-systemctl restart apache2
+#install dependencies
+yum module reset php -y
+yum module enable php:remi-7.4 -y
+yum install php php-common php-mbstring php-opcache php-intl php-xml php-gd php-curl php-mysqlnd php-fpm php-json -y
+systemctl start php-fpm
+systemctl enable php-fpm
+
+#download wordpress
+wget http://wordpress.org/latest.tar.gz
+
+#setup wordpress
+tar xzvf latest.tar.gz
+rm -rf latest.tar.gz
+cp wordpress/wp-config-sample.php wordpress/wp-config.php
+mkdir /var/www/html/
+cp -R /wordpress/* /var/www/html/
+
+#create healthstatus file
+cd /var/www/html/
+touch healthstatus
+
+#changing the localhost to RDS endpoint
+sed -i "s/localhost/terraform-20250415151647635200000002.c7oiy86sk0e7.us-east-1.rds.amazonaws.com/g" wp-config.php
+
+#set up the username and password for the RDS 
+sed -i "s/username_here/admin/g" wp-config.php 
+sed -i "s/password_here/supersecurepassword123/g" wp-config.php 
+sed -i "s/database_name_here/wordpress_db/g" wp-config.php 
+chcon -t httpd_sys_rw_content_t /var/www/html/ -R
+systemctl restart httpd
 ```
 
 
@@ -1164,32 +1169,129 @@ output "asg_name" {
 }
 ```
 
-**main.tf (root)**
-```
-module "asg" {
-  source             = "./modules/asg"
-  ami_id             = var.wordpress_ami
-  instance_type      = var.wordpress_instance_type
-  key_pair_name      = var.ec2_key_name
-  security_group_ids = [module.wordpress.wordpress_sg_id]
-  private_subnet_ids = module.vpc.private_subnet_ids
-  target_group_arn   = module.alb.alb_target_group_arn
-  efs_dns_name       = module.efs.efs_dns_name
-}
-```
-
 **Command**
 ```
 terraform init
 terraform validate
 terraform plan
-terraform apply
+terraform apply -target=module.asg
 terraform state list
 terraform output alb_dns_name
 ```
 ![](./img/3b.state.alb.png)
 ![](./img/3c.output.png)
 
+---
+
+
+
+## 🎥 Live Demonstration of Wordpress Site 
+
+### SSH into your Private EC2 instance (via Bastion Host)
+
+```
+# SSH into public Bastion:
+ssh -i path/to/your-key.pem ec2-user@<your-bastion-public-ip>
+
+# Copy keypair into Bastion (from local terminal):
+scp -i "keypair.pem" wordpress-key.pem ec2-user@<your-bastion-public-ip>:/home/ec2-user/
+
+# On Bastion:
+chmod 400 wordpress-key.pem
+ssh -i wordpress-key.pem ec2-user@<your-private-ec2-ip>
+
+# Restart apache and check WordPress is working:
+sudo systemctl restart httpd
+curl localhost
+```
+
+### Check if WordPress Exists on EC2 
+```
+ls /var/www/html/
+cat /var/www/html/wp-config.php
+sudo systemctl restart httpd
+curl localhost
+```
+![](./img/4.ls.var.png)
+![](./img/4b.curl.png)
+
+
+### Verify WordPress Deployment via Terminal
+```
+terraform output alb_dns
+curl http://your-alb-dns-name
+```
+![](./img/4d.curl.alb.onterminal.png)
+
+
+
+## 🌐 Test the Live WordPress Site
+Open the site via the Load Balancer's DNS Output:
+```
+terraform output alb_dns_name
+```
+![](./img/3c.output.png)
+
+
+### Test the Live WordPress Site
+
+visit the ALB DNS in a browser:
+```
+http://your-alb-dns-name
+```
+![](./img/4c.wordpress.installation.png)
+![](./img/5b.wordpress.dashboard.png)
+![](./img/4a.browser.png)
+
+---
+
+### Confirm Target Health in Target Group
+After deployment, ensure the EC2 instance is healthy in the ALB's target group. A healthy target confirms that the load balancer can route traffic correctly to your WordPress server.
+![](./img/6a.healthcheck.png)
+
+
+## 🧪 Simulate Auto Scaling (Live Demo)
+From your terminal (or EC2 instance), run:
+```
+ab -n 1000 -c 50 http://<ALB-DNS>/
+```
+![](./img/7a.ab.n.1000.livedemo.png)
+
+## 🔁 Monitor Scaling in CloudWatch
+```
+ab -n 10000 -c 100 http://wordpress-alb-1462623383.us-east-1.elb.amazonaws.com/
+aws autoscaling describe-auto-scaling-groups
+```
+![](./img/7b.ab.n.10000.png)
+![](./img/7c.aws.autoscaling.des.png)
+
+
+## 🧼 Clean up Resources
+```
+terreform destroy
+```
+
+
+## ✅ Best Practices Implemented
+
+✔️ Multi-AZ deployment for high availabilty
+
+✔️ EFS used for WordPress file storage (data persistence)
+
+✔️ RDS MySQL for WordPress backend database
+
+✔️ User Data + Cloud-init for EC2 configuration
+
+✔️ Modular Terraform structure for reusability
+
+✔️ Load Balancer integrated with Auto Scaling Group
+
+✔️ Bastion host setup for secure EC2 access
+
+
+
+## 🔚 Conclusion
+This project showcases the power of infrastructure as code (IaC) with Terraform to provision and manage a full-stack WordPress environment on AWS. By integrating best practices like modularity, high availability, auto-scaling, and security (via Bastion and VPC setup), you achieve a production-grade deployment that can handle real-world workloads with ease.
 
 ## Push to Github
 ```
@@ -1201,39 +1303,12 @@ git status
 ```
 
 
+## 👨‍💻 Author
 
-## Live Demonstration of Wordpress Site 
+**Name:** Joy Nwatuzor
 
-### SSH into your EC2 instance
+**Capstone Project** | DevOps Engineer Track
 
-First, SSH into the public instance using your key pair:
-+ Save content of key pair into a file
+**Happy building! 🎉**
 
-```
-git clone https://github.com/yourusername/wordpress-terraform-aws.git
-nano wordpress-key.pem
-ssh -i path/to/your-key.pem ec2-user@<your-ec2-public-ip>
-```
-
-### Update and Install Apache (httpd)
-
-For Amazon Linux:
-```
-sudo yum update -y
-sudo yum install -y httpd
-```
-
-### Start and Enable Apache
-```
-sudo systemctl start httpd
-sudo systemctl enable httpd
-```
-
-## Test Site is Live
-Open the site via the Load Balancer's DNS or custom domain:
-```
-terraform output alb_dns_name
-http://your-alb-dns-name
-```
-![](./img/3c.output.png)
-![](./img/4a.browser.png)
+**Terraform | AWS | WordPress | Automation**
